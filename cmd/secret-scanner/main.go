@@ -10,19 +10,6 @@ import (
 	"secret-scanner/internal/scan"
 )
 
-var ruleSpecs = []rules.RuleSpec{
-	{
-		ID:      "github-pat",
-		Prefix:  "ghp_",
-		Pattern: `ghp_[0-9a-zA-Z]{36}`,
-	},
-	{
-		ID:      "aws-access-key",
-		Prefix:  "AKIA",
-		Pattern: `\bAKIA[0-9A-Z]{16}\b`,
-	},
-}
-
 func main() {
 	os.Exit(run(os.Args, os.Stdout, os.Stderr))
 }
@@ -40,7 +27,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 
-	rules, err := rules.CompileAll(ruleSpecs)
+	rules, err := rules.CompileDefault()
 	if err != nil {
 		fmt.Fprintf(stderr, "failed to compile regex: %v\n", err)
 		return 2

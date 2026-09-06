@@ -17,6 +17,19 @@ type Rule struct {
 	Pattern *regexp.Regexp
 }
 
+var defaultRuleSpecs = []RuleSpec{
+	{
+		ID:      "github-pat",
+		Prefix:  "ghp_",
+		Pattern: `ghp_[0-9a-zA-Z]{36}`,
+	},
+	{
+		ID:      "aws-access-key",
+		Prefix:  "AKIA",
+		Pattern: `\bAKIA[0-9A-Z]{16}\b`,
+	},
+}
+
 func Compile(spec RuleSpec) (Rule, error) {
 	if spec.ID == "" {
 		return Rule{}, fmt.Errorf("rule ID is empty")
@@ -51,4 +64,8 @@ func CompileAll(specs []RuleSpec) ([]Rule, error) {
 	}
 
 	return rules, nil
+}
+
+func CompileDefault() ([]Rule, error) {
+	return CompileAll(defaultRuleSpecs)
 }
