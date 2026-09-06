@@ -2,7 +2,7 @@ package scan
 
 import (
 	"bytes"
-	"fmt"
+	"sort"
 
 	"secret-scanner/internal/rules"
 )
@@ -20,7 +20,7 @@ type Match struct {
 	Secret string
 }
 
-func Scan(rules []rules.Rule, target Target) ([]string, error) {
+func Scan(rules []rules.Rule, target Target) []Match {
 	var matches []Match
 	data := target.Data
 
@@ -48,15 +48,12 @@ func Scan(rules []rules.Rule, target Target) ([]string, error) {
 		}
 	}
 
-	var output []string
+	sort.Slice(matches, func(i, j int) bool {
+		if matches[i].Line == matches[j].Line {
+			return matches[i].Column < matches[j].Column
+		}
+		return matches[i].Line < matches[j].Line
+	})
 
-	if len(matches) == 0 {
-		output = append(output, "clean: no secrets found")
-		return output, nil
-	}
-
-	for _, f := range matches {
-		output = append(output, fmt.Sprintf("%s:%d:%d: [%s] %s", f.Path, f.Line, f.Column, f.RuleID, f.Secret))
-	}
-	return output, nil
+	return matches
 }
