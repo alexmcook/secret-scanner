@@ -29,6 +29,7 @@ func TestCompile(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("Compile() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if !tt.wantErr && rule.ID != tt.spec.ID {
 				t.Errorf("rule.ID = %q, want %q", rule.ID, tt.spec.ID)
 			}
@@ -46,6 +47,7 @@ func TestCompileAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CompileAll() failed unexpectedly: %v", err)
 	}
+
 	if len(compiled) != 2 {
 		t.Fatalf("expected 2 rules, got %d", len(compiled))
 	}
@@ -54,5 +56,32 @@ func TestCompileAll(t *testing.T) {
 	_, err = rules.CompileAll(invalidSpecs)
 	if err == nil {
 		t.Fatalf("expected error on invalid regex in CompileAll, got nil")
+	}
+}
+
+func TestCompileDefault(t *testing.T) {
+	compiled, err := rules.CompileDefault()
+	if err != nil {
+		t.Fatalf("CompileDefault() failed unexpectedly: %v", err)
+	}
+
+	if len(compiled) == 0 {
+		t.Fatal("expected default rules to not be empty")
+	}
+
+	seenIDs := make(map[string]bool)
+	for _, r := range compiled {
+		if r.ID == "" {
+			t.Error("found default rule with empty ID")
+		}
+
+		if seenIDs[r.ID] {
+			t.Errorf("duplicate rule ID found: %q", r.ID)
+		}
+		seenIDs[r.ID] = true
+
+		if r.Pattern == nil {
+			t.Errorf("rule %q has nil regex pattern", r.ID)
+		}
 	}
 }
